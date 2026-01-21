@@ -1,7 +1,6 @@
 {
   "name": "messenger-bot-sepay",
   "version": "1.0.0",
-  "description": "Bot ban code game auto",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
