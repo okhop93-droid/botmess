@@ -1,5 +1,5 @@
 const fs = require("fs");
-const login = require("facebook-chat-api"); // Đã đổi thư viện chính thống
+const login = require("facebook-chat-api"); 
 const express = require("express");
 const bodyParser = require("body-parser");
 
@@ -8,12 +8,12 @@ app.use(bodyParser.json());
 
 const DATA_FILE = "./data.json";
 
-// Hàm đọc dữ liệu an toàn
+// Đọc dữ liệu từ data.json
 const getData = () => {
     try {
         return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     } catch (e) {
-        return { products: [], orders: [] };
+        return { products: [] };
     }
 };
 
@@ -22,13 +22,11 @@ const appState = JSON.parse(fs.readFileSync('appstate.json', 'utf8'));
 
 login({appState}, (err, api) => {
     if(err) {
-        console.error("Lỗi đăng nhập: Kiểm tra lại file appstate.json");
+        console.error("Lỗi đăng nhập: Hãy kiểm tra lại file appstate.json");
         return;
     }
 
-    // Cấu hình bot
     api.setOptions({ listenEvents: true, selfListen: false });
-
     console.log("Bot Messenger đang LIVE...");
 
     api.listenMqtt((err, message) => {
@@ -38,7 +36,6 @@ login({appState}, (err, api) => {
         const msg = message.body.toLowerCase().trim();
         const data = getData();
 
-        // Kiểm tra xem khách có nhắn ID sản phẩm (số) không
         const productID = parseInt(msg);
         const prod = data.products.find(p => p.id === productID);
 
@@ -51,10 +48,9 @@ login({appState}, (err, api) => {
             info += `💰 Số tiền: ${prod.price.toLocaleString()}đ\n`;
             info += `📝 Nội dung: MUA${prod.id}${senderID}\n`;
             info += `--------------------------\n`;
-            info += `🤖 Chuyển đúng nội dung để nhận code ngay!`;
+            info += `🤖 Hệ thống tự gửi Code sau khi nhận đủ tiền!`;
             api.sendMessage(info, senderID);
         } else {
-            // Phản hồi khi có bất kỳ tin nhắn nào khác
             let intro = "🤖 SHOP GAME AUTO XIN CHÀO!\n\n";
             intro += "Danh sách sản phẩm hiện có:\n";
             data.products.forEach(p => {
@@ -65,7 +61,7 @@ login({appState}, (err, api) => {
         }
     });
 
-    // Xử lý Webhook SePay
+    // Nhận Webhook từ SePay
     app.post("/sepay-webhook", (req, res) => {
         const { content, transferAmount } = req.body;
         const data = getData();
@@ -80,15 +76,13 @@ login({appState}, (err, api) => {
                 const code = prod.stock.shift();
                 fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
-                api.sendMessage(`✅ Giao dịch thành công!\n🎁 Code của bạn là: ${code}`, userID);
+                api.sendMessage(`✅ Thanh toán thành công!\n🎁 Code của bạn là: ${code}`, userID);
             }
         }
         res.sendStatus(200);
     });
 });
 
-// Giữ cho Render không bị chết (Keep-alive)
-app.get("/", (req, res) => res.send("Bot đang chạy ổn định!"));
-
+app.get("/", (req, res) => res.send("Bot is Online!"));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
