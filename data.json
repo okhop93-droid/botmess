@@ -2,15 +2,9 @@
   "products": [
     {
       "id": 1,
-      "name": "Key Game Steam AAA",
-      "price": 50000,
-      "stock": ["STEAM-XXXX-YYYY", "STEAM-ZZZZ-AAAA"]
-    },
-    {
-      "id": 2,
-      "name": "Code Liên Quân 100 quân huy",
-      "price": 20000,
-      "stock": ["LQ-123", "LQ-456"]
+      "name": "Code Test",
+      "price": 1000,
+      "stock": ["CODE-DEMO-123"]
     }
   ]
 }
